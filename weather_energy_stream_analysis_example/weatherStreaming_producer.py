@@ -29,10 +29,13 @@ def getWeatherData(city):
 
 
 if __name__ == '__main__':
+
+    # Create ArgumentParser object
     parser = ArgumentParser()
     parser.add_argument('config_file', type=FileType('r'))
     args = parser.parse_args()
 
+    # Read the config file for setting up the connection with the Producer
     config_parser = ConfigParser()
     config_parser.read_file(args.config_file)
     config = dict(config_parser['default'])
@@ -48,11 +51,16 @@ if __name__ == '__main__':
             print("Produced event to topic {topic}: key = {key:12} value = {value:12}".format(
                 topic=msg.topic(), key=msg.key().decode('utf-8'), value=msg.value().decode('utf-8')))
     cities = ['Fullerton US','Los Angeles US','Pune India','Mumbai India']
+
+    # Topic to push data to
     topic = "weather"
+
+    # Create mock data and keep pushing to producer while true. 
     while True:
         for city in cities:
             msg = f'{getWeatherData(city)}'
             print(msg)
+            # Push the mock record to the producer.
             producer.produce(topic, msg,str(city), callback=delivery_callback)
             producer.poll(10000)
             producer.poll()
